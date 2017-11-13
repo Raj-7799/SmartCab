@@ -8,7 +8,7 @@ class LearningAgent(Agent):
     """ An agent that learns to drive in the Smartcab world.
         This is the object you will be modifying. """ 
 
-    def __init__(self, env, learning=False, epsilon=1.0, alpha=0.5):
+    def __init__(self, env, learning=False, epsilon=1.0, alpha=0.6):
         super(LearningAgent, self).__init__(env)     # Set the agent in the evironment 
         self.planner = RoutePlanner(self.env, self)  # Create a route planner
         self.valid_actions = self.env.valid_actions  # The set of valid actions
@@ -46,8 +46,10 @@ class LearningAgent(Agent):
             self.alpha = 0.0
         else:
             #self.epsilon = self.epsilon - 0.05
+            #self.epsilon = self.trial ** self.alpha
             #self.epsilon = 1 / (self.trial ** 2)
-            self.epsilon = math.fabs(math.cos(self.alpha*self.trial))
+            #self.epsilon = math.fabs(math.cos(self.alpha*self.trial))
+            self.epsilon = math.e ** (-1 * 0.005 * self.trial)
         return None
 
     def build_state(self):
@@ -69,7 +71,7 @@ class LearningAgent(Agent):
         # constraints in order for you to learn how to adjust epsilon and alpha, and thus learn about the balance between exploration and exploitation.
         # With the hand-engineered features, this learning process gets entirely negated.
         # Set 'state' as a tuple of relevant data for the agent        
-        state = (waypoint, inputs['light'], inputs['oncoming'])
+        state = (waypoint, inputs['light'], inputs['left'] ,inputs['oncoming'])
 
         return state
 
@@ -82,9 +84,7 @@ class LearningAgent(Agent):
         ## TO DO ##
         ###########
         # Calculate the maximum Q-value of all actions for a given state
-
-        maxAction = max(self.Q[state], key = lambda x: self.Q[state][x])
-        maxQ = self.Q[state][maxAction]
+        maxQ = max(self.Q[state].values())
 
         return maxQ 
 
@@ -98,8 +98,9 @@ class LearningAgent(Agent):
         # When learning, check if the 'state' is not in the Q-table
         # If it is not, create a new dictionary for that state
         #   Then, for each action available, set the initial Q-value to 0.0
-        if state not in self.Q:
-            self.Q[state] = {'left': 0, 'right':0, 'forward':0, None:0}
+        if self.learning:
+            if state not in self.Q:
+                self.Q[state] = {'left': 0, 'right':0, 'forward':0, None:0}
         return
 
 
@@ -200,7 +201,7 @@ def run():
     # Flags:
     #   tolerance  - epsilon tolerance before beginning testing, default is 0.05 
     #   n_test     - discrete number of testing trials to perform, default is 0
-    sim.run(n_test = 20, tolerance = 0.005)
+    sim.run(n_test = 200, tolerance = 0.0005)
 
 
 if __name__ == '__main__':
