@@ -26,7 +26,6 @@ class LearningAgent(Agent):
 
 
     def reset(self, destination=None, testing=False):
-        self.trial += 1
         """ The reset function is called at the beginning of each trial.
             'testing' is set to True if testing trials are being used
             once training trials have completed. """
@@ -45,10 +44,11 @@ class LearningAgent(Agent):
             self.epsilon = 0.0
             self.alpha = 0.0
         else:
+        	self.trial += 1
             #self.epsilon = self.epsilon - 0.05
             #self.epsilon = self.trial ** self.alpha
             #self.epsilon = 1 / (self.trial ** 2)
-            #self.epsilon = math.fabs(math.cos(self.alpha*self.trial))
+       		#self.epsilon = math.fabs(math.cos(self.alpha * self.trial))
             self.epsilon = math.e ** (-1 * 0.005 * self.trial)
         return None
 
@@ -119,7 +119,7 @@ class LearningAgent(Agent):
         # Otherwise, choose an action with the highest Q-value for the current state
         # Be sure that when choosing an action with highest Q-value that you randomly select between actions that "tie".
         action = None
-        if not self.learning:
+        if not self.learning or random.random() <= self.epsilon: # take random action when not learning or with epsilon probability
             action = random.choice(self.valid_actions)
         else:
             same_maxQ = []
@@ -201,7 +201,7 @@ def run():
     # Flags:
     #   tolerance  - epsilon tolerance before beginning testing, default is 0.05 
     #   n_test     - discrete number of testing trials to perform, default is 0
-    sim.run(n_test = 100, tolerance = 0.0005)
+    sim.run(n_test = 200, tolerance = 0.0005)
 
 
 if __name__ == '__main__':
